@@ -1,8 +1,11 @@
 [workspace]
 members = [
     "frontend",
-    "backend"
+    "backend",
+    "rust-pipeviewer",
+    "system-monitoring"
 ]
+
 
 resolver = "2"
 
