@@ -28,10 +28,10 @@ async fn main() {
         let disk_usage = get_disk_usage(&mut sys);
 
         println!("");
-        
+
         // 기록 추가
         push_and_limit(&mut cpu_history, cpu_usage > get_env_num("CPU_THRESHOLD", 80.0));
-        push_and_limit(&mut mem_history, mem_usage > get_env_num("MEM_THRESHOLD", 50.0));
+        push_and_limit(&mut mem_history, mem_usage > get_env_num("MEM_THRESHOLD", 85.0));
         push_and_limit(&mut disk_history, disk_usage > get_env_num("DISK_THRESHOLD", 70.0));
 
         // 임계치 연속 초과 확인
@@ -151,11 +151,21 @@ async fn send_alert(metric: &str, value: f32) {
     //     eprintln!("Slack 전송 실패: {:?}", e);
     // }
 
+    // 텔레그램
+    // if let Err(e) = send_telegram(&msg).await {
+    //     eprintln!("Slack 전송 실패: {:?}", e);
+    // }
+
+    // 카카오톡
+    // if let Err(e) = send_kakao(&msg).await {
+    //     eprintln!("카카오톡 전송 실패: {:?}", e);
+    // }
+
     // 이메일 알림 보내기
     if let Err(e) = send_email(&msg).await {
         eprintln!("이메일 전송 실패: {:?}", e);
     }
-    
+
     println!("");
 }
 
@@ -172,12 +182,11 @@ async fn send_slack(message: &str) -> Result<(), ureq::Error> {
 
     Ok(())
 }
-
 async fn send_email(message: &str) -> Result<(), Box<dyn std::error::Error>> {
     use lettre::transport::smtp::authentication::Credentials;
     use lettre::{SmtpTransport, Transport};
     use lettre::Message;
-    
+
     let email = Message::builder()
         .from(get_env_str("MAIL_FROM", "kke@mz.co.kr"))
         .to(get_env_str("MAIL_TO", "autumnya@gmail.com"))
@@ -191,6 +200,55 @@ async fn send_email(message: &str) -> Result<(), Box<dyn std::error::Error>> {
         .build();
 
     mailer.send(&email)?;
+
+    Ok(())
+}
+
+async fn send_telegram(message: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let bot_token = get_env_str::<String>("TELEGRAM_BOT_TOKEN", "");
+    let chat_id = get_env_str::<String>("TELEGRAM_CHAT_ID", "");
+
+    let url = format!("https://api.telegram.org/bot{}/sendMessage", bot_token);
+
+    let client = reqwest::Client::new();
+    let res = client.post(&url)
+        .json(&serde_json::json!({
+            "chat_id": chat_id,
+            "text": message
+        }))
+        .send()
+        .await?;
+
+    if !res.status().is_success() {
+        eprintln!("텔레그램 전송 실패: {:?}", res.text().await?);
+    }
+
+    Ok(())
+}
+
+async fn send_kakao(message: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let access_token = get_env_str::<String>("KAKAO_ACCESS_TOKEN", "");
+
+    let client = reqwest::Client::new();
+    let res = client.post("https://kapi.kakao.com/v2/api/talk/memo/default/send")
+        .bearer_auth(access_token)
+        .form(&[
+            ("template_object", serde_json::json!({
+                "object_type": "text",
+                "text": message,
+                "link": {
+                    "web_url": "https://your-system.example.com",
+                    "mobile_web_url": "https://your-system.example.com"
+                },
+                "button_title": "자세히 보기"
+            }).to_string())
+        ])
+        .send()
+        .await?;
+
+    if !res.status().is_success() {
+        eprintln!("카카오톡 전송 실패: {:?}", res.text().await?);
+    }
 
     Ok(())
 }
