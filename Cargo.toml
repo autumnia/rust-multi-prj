@@ -3,7 +3,8 @@ members = [
     "invaders",
     "pipeviewer",
     "system-monitoring",
-    "data-ea"
+    "data-ea",
+    "tutor/bend"
 ]
 
 
