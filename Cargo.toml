@@ -1,7 +1,6 @@
 [workspace]
 members = [
-    "frontend",
-    "backend",
+    "invaders",
     "pipeviewer",
     "system-monitoring",
     "data-ea"

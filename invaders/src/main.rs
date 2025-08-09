@@ -11,7 +11,6 @@ use std::{
     time::{Duration, Instant},
     {io, thread},
 };
-
 use invaders::{
     frame::{self, new_frame, Drawable, Frame},
     invaders::Invaders,
@@ -40,9 +39,29 @@ fn reset_game(in_menu: &mut bool, player: &mut Player, invaders: &mut Invaders) 
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut audio = Audio::new();
+
+    // 실행 파일 경로 기준 audio/original
+    let exe_dir = std::env::current_exe().unwrap()
+        .parent().unwrap()
+        .to_path_buf()
+        .join("audio")
+        .join("original");
+
     for item in &["explode", "lose", "move", "pew", "startup", "win"] {
-        audio.add(item, &format!("audio/original/{}.wav", item));
+        let file_path = exe_dir.join(format!("{}.wav", item));
+        audio.add(item, file_path.to_str().unwrap());
     }
+
+    // 현재 크레이트(invaders)의 루트 경로 + audio/original
+    // let base_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+    //     .join("audio")
+    //     .join("original");
+    //
+    // for item in &["explode", "lose", "move", "pew", "startup", "win"] {
+    //     let file_path = base_path.join(format!("{}.wav", item));
+    //     audio.add(item, file_path.to_str().unwrap());
+    // }
+
     audio.play("startup");
 
     // Terminal

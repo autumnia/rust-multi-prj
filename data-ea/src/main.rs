@@ -1,4 +1,14 @@
-#![warn(unused_imports)]
+//! # Header
+//! cargo fmt => cargo check => cargo build => cargo run
+//! cargo test
+//! cargo doc --no-deps --open
+
+// todo!();
+// unimplemented!();
+
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused_imports)]
 
 use elusion::prelude::*;
 
@@ -17,10 +27,61 @@ use elusion::prelude::*;
 async fn main() -> ElusionResult<()> {
     println!("Hello Elusion!");
 
-    agg_data().await?;
+    datetime_data().await?;
+    // agg_data().await?;
     // filter_data().await?;
     // select_data().await?;
 
+    Ok(())
+}
+
+async fn datetime_data() -> Result<(), ElusionError> {
+    let path_data = "data-ea/data/sales_order_report2.csv";
+    let df = CustomDataFrame::new(path_data, "sales_data").await?;
+
+    let result = df
+        .datetime_functions([
+            // Basic date components
+            "DATE_PART('year', order_date) AS year",
+            "DATE_PART('month', order_date) AS month",
+            "DATE_PART('day', order_date) AS day",
+
+            // Time differences
+            "DATE_PART('day', delivery_date - order_date) AS days_to_deliver",
+
+            // Quarter and Weeks
+            "DATE_PART('quarter', order_date) AS order_quarter",
+            "DATE_PART('week', order_date) AS order_week",
+
+            // Day of week/year
+            "DATE_PART('dow', order_date) AS day_of_week",
+            "DATE_PART('day', order_date) AS day_of_year",
+        ])
+        .select([
+            "customer_name",
+            "order_date",
+            "ABS(billable_value) AS abs_billable_value",
+            "ROUND(SQRT(billable_value), 2) AS SQRT_billable_value",
+            "billable_value * 2 AS double_billable_value" ,
+            "billable_value / 100 AS percentage_billable_value",
+        ])
+        .agg([
+            "ROUND(AVG(ABS(billable_value)), 2) AS avg_abs_billable_value",
+            "SUM(billable_value) AS total_billable_value",
+            "MAX(ABS(billable_value)) AS max_abs_billable_value",
+            "SUM(billable_value) * 2 AS duble_total_billable_value",
+            "SUM(billable_value) / 100 AS percentage_total_billable_value"
+        ])
+        .filter("billable_value > 50.0")
+        .group_by_all()
+        .order_by_many([
+            ("total_billable_value", false),
+            ("max_abs_billable_value", true),
+        ])
+        .limit(20)
+        .elusion("res_data").await?;
+
+    result.display().await?;
     Ok(())
 }
 
