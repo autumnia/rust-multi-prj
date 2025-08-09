@@ -1,0 +1,9 @@
+[package]
+name = "data-ea"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+#elusion="3.3.0"
+elusion = { version = "3.12.0", features = ["all"] }
+tokio={version = "1.42.0", features = ["rt-multi-thread"]}

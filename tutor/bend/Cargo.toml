@@ -1,0 +1,33 @@
+[package]
+name = "tutors"
+version = "0.1.0"
+edition = "2021"
+default-run = "server"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "server"
+
+[dependencies]
+# actix
+actix-web = "4.2.1"
+actix-rt = "2.7.0"
+
+# data 직렬화
+serde = { version = "1.0.144", features = ["derive"]}
+
+# 유틸리티
+chrono = {version = "0.4.11", features = ["serde"]}
+
+# Environment access
+dotenv = "0.15.0"
+
+# Database access
+sqlx = {version = "0.6.2", default_features = false, features = ["postgres","runtime-tokio-native-tls", "macros","chrono"]}
+log = "0.4.22"
+
+# Openssl for build
+#openssl = { version = "0.10.41", features = ["vendored"] }
+
+

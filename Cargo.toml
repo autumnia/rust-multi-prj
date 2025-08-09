@@ -3,7 +3,8 @@ members = [
     "frontend",
     "backend",
     "pipeviewer",
-    "system-monitoring"
+    "system-monitoring",
+    "data-ea"
 ]
 
 
