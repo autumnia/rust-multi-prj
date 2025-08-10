@@ -9,11 +9,11 @@ use dotenv::dotenv;
 use sqlx::postgres::PgPool;
 use sqlx::postgres::PgPoolOptions;
 
-#[path = "../routes/course_route.rs"]
-mod course_route;
-
 #[path = "../routes/health_route.rs"]
 mod health_route;
+
+#[path = "../routes/course_route.rs"]
+mod course_route;
 
 #[path = "../handlers/course_handler.rs"]
 mod course_handler;

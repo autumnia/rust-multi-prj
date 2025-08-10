@@ -1,4 +1,4 @@
 [workspace]
-members = ["tutors", "fend"]
+members = ["bend", "fend"]
 
 resolver = "2"

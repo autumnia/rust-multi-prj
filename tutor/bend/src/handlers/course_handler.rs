@@ -75,8 +75,15 @@ mod tests {
         let course = web::Json(Course {
             tutor_id: 1,
             course_name: "Hello, this is a test course".into(),
-            course_id: None,
+            course_id: 1,
             posted_time: None,
+            course_description: None,
+            course_format: None,
+            course_structure: None,
+            course_duration: None,
+            course_price: None,
+            course_language: None,
+            course_level: None,
         });
 
         dotenv().ok();
@@ -84,9 +91,9 @@ mod tests {
 
         let app_state = get_app_state(pool);
 
-        let res = new_course(app_state, course).await;
+        let res = new_course_handler(app_state, course).await;
 
-        assert_eq!(res.status(), StatusCode::OK);
+        assert_eq!(res.expect("OK").status(), StatusCode::OK);
     }
 
     #[actix_rt::test]
@@ -97,11 +104,11 @@ mod tests {
 
         let app_state = get_app_state(pool);
 
-        let tutor_id: web::Path<(i32,)> = web::Path::from((1,));
+        let tutor_id: web::Path<(i32)> = web::Path::from(1);
 
-        let res = get_courses(app_state, tutor_id).await;
+        let res = get_courses_handler(app_state, tutor_id).await;
 
-        assert_eq!(res.status(), StatusCode::OK);
+        assert_eq!(res.expect("OK").status(), StatusCode::OK);
     }
 
     #[actix_rt::test]
@@ -115,8 +122,8 @@ mod tests {
 
         let params: web::Path<(i32, i32)> = web::Path::from((1, 1));
 
-        let res = get_course_detail(app_state, params).await;
+        let res = get_course_detail_handler(app_state, params).await;
 
-        assert_eq!(res.status(), StatusCode::OK);
+        assert_eq!(res.expect("OK").status(), StatusCode::OK);
     }
 }
